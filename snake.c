@@ -1,29 +1,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <conio.h> 
+#include <conio.h>
+#include <time.h>
 
 int main(void) {
 	
-	int dimension = 20, x = 4, y = 5, px = 7, py = 9, i, j, k;
+	const int dimension = 20;
+	const int noop = -1;
+	
+	srand(time(NULL));
+	
+	int x = rand()%dimension, y = rand()%dimension, px = rand()%dimension, py = rand()%dimension, i, j, k, eaten = 0, steps = 0;
 	int snake[dimension*dimension][2];	
-	char currentdirection = 'w', lastdirection = currentdirection;
+	char currentdirection = 'w', lastdirection = ' ';
 	
 	for(i=0;i<(dimension*dimension);++i){
-		snake[i][0] = 0;
-		snake[i][1] = 0;
+		snake[i][0] = noop;
+		snake[i][1] = noop;
 		
 	}
 	
-	snake[0][0] = 1;
-	snake[0][1] = 0;
-	
-	snake[1][0] = 1;
-	snake[1][1] = 0;
-	
 	
 	while(1){
-		printf("Snake\n");				
+		printf("Snake A:%d S:%d\n", eaten , steps++);				
 		for(i=0; i<dimension+2; ++i){
 			if(i == 0){
 				printf("%c", -55);
@@ -32,28 +32,30 @@ int main(void) {
 			}else{
 				printf("%c", -70);
 			}
-			for(j=0; j<dimension+2; ++j){
+			for(j=0; j<dimension+1; ++j){
 				if(i == 0 || i == dimension+1){
 					printf("%c", -51);
 				}else{
-					if(x == i-1 && y == j-1){
+					if(x == j && y == i-1){
 						printf("%c", 153);
-					} else if(px == i-1 && py == j-1){
+					} else if(px == j && py == i-1){
 						printf("X");
 					} else {
-						int a = 0, dx = 0, dy = 0;
+						int a = 0;
 						for(k=0;k<dimension*dimension;++k){
-							dx += snake[k][0];
-							dy += snake[k][1];
-							if(dx + x == i-1 && dy + y == j-1) {
+							if(snake[k][0] == j && snake[k][1] == i-1) {
 								a = 1;
 								break;
-							} else if(snake[k][0] == 0 && snake[k][1] == 0){
+							} else if(snake[k][0] == noop && snake[k][1] == noop){
 								break;
 							}
 						}
 						if(a){
-							printf("O");
+							if(snake[k+1][0] == noop && snake[k+1][1] == noop){
+								printf("o");
+							} else {
+								printf("O");	
+							}
 						} else {
 							printf(" ");
 						}
@@ -72,11 +74,12 @@ int main(void) {
 		
 		currentdirection = getch();
 				
-		if((currentdirection == 'w' || currentdirection == 's' || currentdirection == 'a' || currentdirection == 'd') &&
+		if(	(currentdirection == 'w' || currentdirection == 's' || currentdirection == 'a' || currentdirection == 'd') && 
+			(lastdirection = ' ' ||
 			((lastdirection == 'w' && currentdirection != 's') ||
 			(lastdirection == 's' && currentdirection != 'w') ||
 			(lastdirection == 'a' && currentdirection != 'd') ||
-			(lastdirection == 'd' && currentdirection != 'a')) ){
+			(lastdirection == 'd' && currentdirection != 'a'))) ){
 			lastdirection = currentdirection;
 		}
 		
@@ -84,39 +87,53 @@ int main(void) {
 		for(i = dimension*dimension-1; i>0; --i){
 			snake[i][0] = snake[i-1][0];
 			snake[i][1] = snake[i-1][1];
-			if(a && !(px == x && py == y) && (snake[i][0] != 0 || snake[i][1] != 0)){
-				snake[i][0] = 0;
-				snake[i][1] = 0;
+			if(a && !(px == x && py == y) && (snake[i][0] != noop || snake[i][1] != noop)){
+				snake[i][0] = noop;
+				snake[i][1] = noop;
 				a = 0;
 			}
 		}
 		
+		if(x==px && y==py){
+			px = rand()%dimension;
+			py = rand()%dimension;
+			eaten++;
+		}
+		
 		switch(lastdirection){
 			case 'w':
-				--x;
-				snake[0][0] = 1;
-				snake[0][1] = 0;
+				snake[0][0] = x;		
+				snake[0][1] = y--;
 				break;
 			case 's':
-				++x;
-				snake[0][0] = -1;
-				snake[0][1] = 0;
+				snake[0][0] = x;		
+				snake[0][1] = y++;
 				break;
 			case 'a':
-				--y;
-				snake[0][0] = 0;
-				snake[0][1] = 1;
+				snake[0][0] = x--;		
+				snake[0][1] = y;
 				break;
 			case 'd':
-				++y;
-				snake[0][0] = 0;
-				snake[0][1] = -1;
+				snake[0][0] = x++;		
+				snake[0][1] = y;
 				break;
 		}
 		
-		if( x < 0 || x >= dimension || 
+		
+		a = 0;
+		for(k=0;k<dimension*dimension;++k){
+			if(snake[k][0] == x && snake[k][1] == y) {
+				a = 1;
+				break;
+			} else if(snake[k][0] == noop && snake[k][1] == noop){
+				break;
+			}
+		}
+		
+		if( a || 
+			x < 0 || x >= dimension || 
 			y < 0 || y >= dimension ){
-			printf("defeat");
+			printf("defeat %d %d", x, y);
 			break;
 		}
 		
