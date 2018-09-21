@@ -95,8 +95,21 @@ int main(void) {
 		}
 		
 		if(x==px && y==py){
-			px = rand()%dimension;
-			py = rand()%dimension;
+            do{
+                a = 0;
+                px = rand()%dimension;
+                py = rand()%dimension;
+                
+                for(k=0;k<dimension*dimension;++k){
+                    if(snake[k][0] == px && snake[k][1] == py) {
+                        a = 1;
+                        break;
+                    } else if(snake[k][0] == noop && snake[k][1] == noop){
+                        break;
+                    }
+                }
+                
+            }while(a)
 			eaten++;
 		}
 		
