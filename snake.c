@@ -4,26 +4,36 @@
 #include <conio.h>
 #include <time.h>
 
+#define NOOP -1
+
+int pointIsInSnake( int x, int y, int snake[][2], int snakelength);
+
 int main(void) {
 	
 	const int dimension = 20;
-	const int noop = -1;
 	
 	srand(time(NULL));
 	
-	int x = rand()%dimension, y = rand()%dimension, px = rand()%dimension, py = rand()%dimension, i, j, k, eaten = 0, steps = 0;
+	int x = rand()%dimension, y = rand()%dimension, px = rand()%dimension, py = rand()%dimension, i, j, eaten = 0, steps = 0, part = 0;
 	int snake[dimension*dimension][2];	
 	char currentdirection = 'w', lastdirection = ' ';
 	
 	for(i=0;i<(dimension*dimension);++i){
-		snake[i][0] = noop;
-		snake[i][1] = noop;
+		snake[i][0] = NOOP;
+		snake[i][1] = NOOP;
 		
 	}
 	
+	time_t start, current;
+	
+	printf("Press button to start");
+	getch();
+    system("@cls||clear");
+	time(&start);
 	
 	while(1){
-		printf("Snake A:%d S:%d\n", eaten , steps++);				
+		time(&current);
+		printf("Snake A:%d S:%d T:%.0f\n", eaten , steps++, difftime(current, start));				
 		for(i=0; i<dimension+2; ++i){
 			if(i == 0){
 				printf("%c", -55);
@@ -41,17 +51,8 @@ int main(void) {
 					} else if(px == j && py == i-1){
 						printf("X");
 					} else {
-						int a = 0;
-						for(k=0;k<dimension*dimension;++k){
-							if(snake[k][0] == j && snake[k][1] == i-1) {
-								a = 1;
-								break;
-							} else if(snake[k][0] == noop && snake[k][1] == noop){
-								break;
-							}
-						}
-						if(a){
-							if(snake[k+1][0] == noop && snake[k+1][1] == noop){
+						if(part = pointIsInSnake(j,i-1,snake,dimension*dimension)){
+							if(snake[part][0] == NOOP && snake[part][1] == NOOP){
 								printf("o");
 							} else {
 								printf("O");	
@@ -75,7 +76,7 @@ int main(void) {
 		currentdirection = getch();
 				
 		if(	(currentdirection == 'w' || currentdirection == 's' || currentdirection == 'a' || currentdirection == 'd') && 
-			(lastdirection = ' ' ||
+			(lastdirection == ' ' ||
 			((lastdirection == 'w' && currentdirection != 's') ||
 			(lastdirection == 's' && currentdirection != 'w') ||
 			(lastdirection == 'a' && currentdirection != 'd') ||
@@ -87,29 +88,18 @@ int main(void) {
 		for(i = dimension*dimension-1; i>0; --i){
 			snake[i][0] = snake[i-1][0];
 			snake[i][1] = snake[i-1][1];
-			if(a && !(px == x && py == y) && (snake[i][0] != noop || snake[i][1] != noop)){
-				snake[i][0] = noop;
-				snake[i][1] = noop;
+			if(a && !(px == x && py == y) && (snake[i][0] != NOOP || snake[i][1] != NOOP)){
+				snake[i][0] = NOOP;
+				snake[i][1] = NOOP;
 				a = 0;
 			}
 		}
 		
 		if(x==px && y==py){
             do{
-                a = 0;
                 px = rand()%dimension;
                 py = rand()%dimension;
-                
-                for(k=0;k<dimension*dimension;++k){
-                    if(snake[k][0] == px && snake[k][1] == py) {
-                        a = 1;
-                        break;
-                    } else if(snake[k][0] == noop && snake[k][1] == noop){
-                        break;
-                    }
-                }
-                
-            }while(a)
+            }while(pointIsInSnake(px,py,snake,dimension*dimension));
 			eaten++;
 		}
 		
@@ -132,21 +122,10 @@ int main(void) {
 				break;
 		}
 		
-		
-		a = 0;
-		for(k=0;k<dimension*dimension;++k){
-			if(snake[k][0] == x && snake[k][1] == y) {
-				a = 1;
-				break;
-			} else if(snake[k][0] == noop && snake[k][1] == noop){
-				break;
-			}
-		}
-		
-		if( a || 
+		if( pointIsInSnake(x,y,snake,dimension*dimension) || 
 			x < 0 || x >= dimension || 
 			y < 0 || y >= dimension ){
-			printf("defeat %d %d", x, y);
+			printf("defeat");
 			break;
 		}
 		
@@ -156,4 +135,14 @@ int main(void) {
     return 0;
 }
 
-
+int pointIsInSnake( int x, int y, int snake[][2], int snakelength){
+    int zaehler;
+    for(zaehler=0;zaehler<snakelength;++zaehler){
+        if(snake[zaehler][0] == x && snake[zaehler][1] == y) {
+            return zaehler+1;
+        } else if(snake[zaehler][0] == NOOP && snake[zaehler][1] == NOOP){
+            break;
+        }
+    }
+    return 0;
+}
