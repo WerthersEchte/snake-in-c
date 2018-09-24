@@ -8,6 +8,7 @@
 
 int pointIsInSnake( int x, int y, int snake[][2], int snakelength);
 
+// This is very good
 int main(void) {
 	
 	const int dimension = 20;
@@ -134,6 +135,7 @@ int main(void) {
 
     return 0;
 }
+// This is the end
 
 int pointIsInSnake( int x, int y, int snake[][2], int snakelength){
     int zaehler;
